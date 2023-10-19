@@ -8,14 +8,14 @@ let socketInstanceServerPTIT: Socket | null = null;
 export const getSocketServerCard = () => {
   if (!socketInstanceServerCard) {
     // Nếu chưa có kết nối, tạo mới
-    socketInstanceServerCard = io('http://localhost:3030'); 
+    socketInstanceServerCard = io('http://139.162.47.179:3030'); 
   }
   return socketInstanceServerCard;
 };
   
 export const getSocketServerPTIT = () => {
   if (!socketInstanceServerPTIT) { 
-      socketInstanceServerPTIT = io('http://localhost:3040'); 
+      socketInstanceServerPTIT = io('http://139.162.47.179:3040'); 
   }
   return socketInstanceServerPTIT;
 };
