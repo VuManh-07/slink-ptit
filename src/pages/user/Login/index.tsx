@@ -154,12 +154,20 @@ const Login: React.FC = () => {
 
   const [currentStep, setCurrentStep] = useState(0);
 
-  const ConnectCard = (id: string) => {
+  const ConnectCard = () => {
     setSubmitting(true);
-    localStorage.setItem('roomID', id);
-    socketCard.emit('join', id);
     // localStorage.setItem('token', values.roomID);
-    setCurrentStep(1);
+    fetch('https://api.ipify.org?format=json')
+      .then((response) => response.json())
+      // eslint-disable-next-line @typescript-eslint/no-shadow
+      .then((data) => {
+        const publicIP = data.ip + '_card';
+        console.log('publicIP11111', publicIP);
+        socketCard.emit('join', publicIP);
+        localStorage.setItem('roomID', publicIP);
+      })
+      .catch((error) => console.error('eror:', error));
+    // setCurrentStep(0);
     setSubmitting(false);
   };
 
@@ -178,10 +186,11 @@ const Login: React.FC = () => {
   };
 
   useEffect(() => {
+    ConnectCard();
     // eslint-disable-next-line @typescript-eslint/no-shadow
     socketCard.on('card-response-login-card', (data) => {
       if (data.result) {
-        setCurrentStep(2);
+        setCurrentStep(1);
         setSubmitting(false);
       } else {
         notification.error({
@@ -245,47 +254,14 @@ const Login: React.FC = () => {
               size="small"
               style={{ marginBottom: 18, paddingTop: 0, marginTop: 30 }}
             >
-              <Steps.Step title="Kết nối với thẻ" />
-              <Steps.Step title="Nhập mã PIN" disabled={currentStep == 0} />
+              <Steps.Step title="Nhập mã PIN"  />
               <Steps.Step
                 title="Đăng nhập vào trang"
-                disabled={currentStep == 0 || currentStep == 1}
+                disabled={currentStep == 0}
               />
             </Steps>
 
             {currentStep === 0 ? (
-              <Form
-                layout="vertical"
-                onFinish={async (values) => {
-                  console.log('values', values);
-                  if (values.roomID) {
-                    ConnectCard(values.roomID);
-                  } else {
-                    message.error('Vui lòng nhập mã kết nối!');
-                    return;
-                  }
-                }}
-                style={{ marginTop: '50px' }}
-              >
-                <Form.Item name="code">
-                  <Row gutter={[12, 0]} style={{ marginBottom: 12 }}>
-                    <Col xs={24}>
-                      <Form.Item name="roomID" label="Mã kết nối" rules={[...rules.required]}>
-                        <Input placeholder="Nhập mã kết nối" />
-                      </Form.Item>
-                    </Col>
-                  </Row>
-                </Form.Item>
-                <Button
-                  loading={submitting}
-                  htmlType="submit"
-                  type="primary"
-                  style={{ width: '100%' }}
-                >
-                  Kết nối
-                </Button>
-              </Form>
-            ) : currentStep === 1 ? (
               <Form
                 layout="vertical"
                 onFinish={async (values: { pin: string }) => {
@@ -317,7 +293,7 @@ const Login: React.FC = () => {
                   Đăng nhập vào thẻ
                 </Button>
               </Form>
-            ) : currentStep === 2 ? (
+            ) : currentStep === 1 ? (
               <Button
                 loading={submitting}
                 type="primary"
